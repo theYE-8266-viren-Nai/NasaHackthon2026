@@ -26,6 +26,8 @@ records or documents they use.
 ├── AGENTS.md                 # Team rules, architecture, and workload split
 ├── FRONTEND_PROMPT.md        # Dashboard-generation specification
 ├── README.md                 # Project overview and development guide
+├── catalog/
+│   └── experiments.json      # Small, source-traceable demo catalog
 ├── backend/
 │   ├── server.mjs            # Local Node.js flame-frame analysis and ranking API
 │   └── README.md             # Backend endpoints and request format
@@ -41,6 +43,12 @@ repository to restore them:
 
 - [Saffire-I / PSI-98](https://psi.nasa.gov/physci/repo/data/investigations/PSI-98)
 - [BASS-II / PSI-25](https://psi.nasa.gov/physci/repo/data/investigations/PSI-25)
+
+The tracked catalog contains BASS-II tests B1_147 and B3_148 transcribed from
+NASA/TM-20210011385, Appendix A, Table A.1. It is the fallback for
+GET /api/experiments when the local PSI-25 CSV is not present. The catalog
+contains experiment metadata and observations, but no frame-derived flame
+time series. Those values remain absent until sourced from video analysis.
 
 ## Backend prototype
 
