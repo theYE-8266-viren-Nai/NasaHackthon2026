@@ -13,6 +13,7 @@ function loadCatalog(): CatalogRecord[] {
 
 function normalize(record: CatalogRecord) {
   const id = text(record.experiment_id);
+  const isFlex = text(record.investigation).includes("FLEX");
   const available: string[] = [];
   if (num(record.initial_oxygen_pct) != null || num(record.final_oxygen_pct) != null || num(record.oxygen_condition_pct) != null) available.push("oxygen");
   if (num(record.initial_co2_pct) != null || num(record.final_co2_pct) != null) available.push("carbon dioxide");
@@ -21,12 +22,19 @@ function normalize(record: CatalogRecord) {
   if (num(record.burn_duration_s) != null) available.push("burn duration");
   if (num(record.burn_length_cm) != null) available.push("burn length");
   if (num(record.average_flame_power_w) != null) available.push("average flame power");
+  if (num(record.burning_rate_source_value) != null) available.push("reported burning rate");
+  if (num(record.burn_time_s) != null) available.push("burn time");
+  if (num(record.initial_droplet_diameter_mm) != null) available.push("initial droplet diameter");
+  if (num(record.visible_flame_extinction_diameter_mm) != null) available.push("visible flame extinction diameter");
+  if (text(record.test_end)) available.push("test outcome");
   return {
     id,
     investigation: text(record.investigation),
     title: id,
+    testId: text(record.test_id),
+    sampleId: text(record.sample_id),
     material: text(record.fuel_material) || "Unknown material",
-    condition: [record.gravity_condition, record.flow_configuration && `${record.flow_configuration} flow`, record.airflow_speed_cm_s != null && `airflow ${record.airflow_speed_cm_s} cm/s`, record.flow_restrictor && `${record.flow_restrictor} flow restrictor`, record.fan_display && `fan display ${record.fan_display}`].filter(Boolean).join(" · "),
+    condition: [record.gravity_condition, record.flow_configuration && `${record.flow_configuration} flow`, record.airflow_speed_cm_s != null && `airflow ${record.airflow_speed_cm_s} cm/s`, record.ambient_pressure_mmhg != null && `ambient pressure ${record.ambient_pressure_mmhg} mmHg`, record.initial_oxygen_mole_fraction != null && `initial O₂ mole fraction ${record.initial_oxygen_mole_fraction}`, record.test_end && `test ended: ${record.test_end}`, record.flow_restrictor && `${record.flow_restrictor} flow restrictor`, record.fan_display && `fan display ${record.fan_display}`].filter(Boolean).join(" · "),
     gravity: text(record.gravity_condition) || "not reported",
     date: record.date ?? null,
     measurements: available,
@@ -45,6 +53,23 @@ function normalize(record: CatalogRecord) {
     burnLengthCm: num(record.burn_length_cm),
     averageFlamePowerW: num(record.average_flame_power_w),
     averageFlamePowerUncertaintyW: num(record.average_flame_power_uncertainty_w),
+    ambientPressureMmHg: num(record.ambient_pressure_mmhg),
+    initialOxygenMoleFraction: num(record.initial_oxygen_mole_fraction),
+    initialNitrogenMoleFraction: num(record.initial_nitrogen_mole_fraction),
+    initialCoColumnMoleFraction: num(record.initial_co_column_mole_fraction),
+    initialHeliumMoleFraction: num(record.initial_helium_mole_fraction),
+    initialDropletDiameterMm: num(record.initial_droplet_diameter_mm),
+    visibleFlameExtinctionDiameterMm: num(record.visible_flame_extinction_diameter_mm),
+    burningRateSourceValue: num(record.burning_rate_source_value),
+    burningRateUnitLabel: text((record.reported_metric_units as Record<string, unknown> | undefined)?.burning_rate_source_value),
+    burnTimeS: num(record.burn_time_s),
+    testEnd: text(record.test_end) || null,
+    recordKind: isFlex ? "reported aggregate" : Array.isArray(record.measurements) && record.measurements.length ? "time series available" : "reported record",
+    reportedMetrics: record.reported_metrics ?? {},
+    reportedMetricUnits: record.reported_metric_units ?? {},
+    reportedMetricQualifiers: record.reported_metric_qualifiers ?? {},
+    sourceRowNumber: num(record.source_row_number),
+    sourceDataVersion: num(record.source_data_version),
     finding: text(record.observation) || text(record.data_provenance) || "No narrative observation is available in the curated record.",
     sourceUrl: text(record.source_url),
     sourceLabel: text(record.source_title) || "NASA source document",
@@ -54,6 +79,9 @@ function normalize(record: CatalogRecord) {
       ["initial oxygen", record.initial_oxygen_pct], ["final oxygen", record.final_oxygen_pct],
       ["flame spread rate", record.flame_spread_rate_mm_s], ["burn duration", record.burn_duration_s],
       ["burn length", record.burn_length_cm], ["average flame power", record.average_flame_power_w],
+      ["ambient pressure", record.ambient_pressure_mmhg], ["initial oxygen mole fraction", record.initial_oxygen_mole_fraction],
+      ["initial droplet diameter", record.initial_droplet_diameter_mm], ["visible flame extinction diameter", record.visible_flame_extinction_diameter_mm],
+      ["burning rate", record.burning_rate_source_value], ["burn time", record.burn_time_s], ["test outcome", record.test_end],
       ["airflow speed", record.airflow_speed_cm_s], ["initial CO2", record.initial_co2_pct],
       ["final CO2", record.final_co2_pct], ["initial CO", record.initial_co_ppm], ["final CO", record.final_co_ppm]
     ].filter(([, value]) => value == null).map(([label]) => label),

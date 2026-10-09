@@ -19,23 +19,31 @@ export async function POST(request: Request) {
       experimentId: item.experiment_id, investigation: item.investigation, material: item.fuel_material,
       condition: [item.gravity_condition, item.flow_configuration, item.airflow_speed_cm_s != null ? `${item.airflow_speed_cm_s} cm/s airflow` : null].filter(Boolean).join(", "),
       reported: Object.fromEntries(["initial_oxygen_pct", "final_oxygen_pct", "oxygen_condition_pct", "initial_co_ppm", "final_co_ppm", "flame_spread_rate_mm_s", "burn_duration_s", "burn_length_cm", "average_flame_power_w", "average_flame_power_uncertainty_w"].map((key) => [key, item[key] ?? null])),
+      reportedMetrics: item.reported_metrics ?? {},
+      reportedMetricUnits: (item.reported_metric_units ?? {}) as Record<string, string>,
+      reportedMetricQualifiers: (item.reported_metric_qualifiers ?? {}) as Record<string, string>,
       observation: item.observation ?? null, provenance: item.data_provenance ?? null,
-      sourceUrl: item.source_url, sourceTitle: item.source_title
+      sourceUrl: item.source_url, sourceTitle: item.source_title, sourceDocumentUrl: item.source_document_url ?? null,
+      sourceRowNumber: item.source_row_number ?? null, sourceDataVersion: item.source_data_version ?? null
     }));
-    const missing = sources.some((item) => Object.values(item.reported).some((value) => value == null));
+    const missing = sources.some((item) => Object.values(item.reported).some((value) => value == null) || Object.values(item.reportedMetrics).some((value) => value == null));
     const incompleteEvidence = missing || sources.some((item) => !item.observation);
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       const summaries = sources.map((item) => {
-        const measured = Object.entries(item.reported).filter(([, value]) => value != null).map(([key, value]) => `${key.replaceAll("_", " ")}: ${value}`).join("; ") || "no numeric measurements are available";
-        return `${item.experimentId} (${item.investigation}) reports ${measured}. ${item.observation ?? "The catalog has no observation text for this run."}`;
+        const fields = { ...item.reported, ...item.reportedMetrics };
+        const measured = Object.entries(fields).filter(([, value]) => value != null).map(([key, value]) => {
+          const unit = item.reportedMetricUnits[key]; const qualifier = item.reportedMetricQualifiers[key];
+          return `${key.replaceAll("_", " ")}: ${qualifier ? `${qualifier}; ` : ""}${value}${unit ? ` ${unit}` : ""}`;
+        }).join("; ") || "no numeric measurements are available";
+        return `${item.experimentId} (${item.investigation}) reports ${measured}. ${item.observation ?? item.provenance ?? "The catalog has no observation text for this run."}`;
       });
       return NextResponse.json({ answer: `${summaries.join("\n\n")}\n\nThis is a source-grounded catalog summary, not a generated safety procedure. ${incompleteEvidence ? "Evidence is incomplete; missing measurements are not inferred." : "The selected catalog fields are populated, but remain a small research subset."}`, generated: false, incompleteEvidence, sources: sources.map(({ experimentId, sourceUrl, sourceTitle }) => ({ experimentId, sourceUrl, sourceTitle })) });
     }
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({ model: process.env.OPENAI_MODEL ?? "gpt-4.1-mini", input: [
-        { role: "system", content: "Answer using only the provided NASA experiment records. Separate reported measurements from interpretation. Do not infer missing values, claim causation, invent citations, or give operational fire-safety instructions. State when evidence is incomplete. Cite records by experiment ID; source links are supplied separately." },
+        { role: "system", content: "Answer using only the provided NASA experiment records. Separate reported measurements from interpretation. Preserve reported units and qualifiers, and explicitly surface source-label discrepancies described in provenance. Do not infer missing values, resolve conflicting units by guessing, claim causation, invent citations, or give operational fire-safety instructions. State when evidence is incomplete. Cite records by experiment ID; source links are supplied separately." },
         { role: "user", content: `Question: ${question}\n\nNASA catalog records (JSON):\n${JSON.stringify(sources)}` }
       ] })
     });

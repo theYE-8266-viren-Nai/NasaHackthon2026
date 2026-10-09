@@ -103,6 +103,16 @@ The current PSI-69 table and the cited NTRS report describe different test
 counts and may represent different data scopes or versions. Verify the source
 scope before combining or comparing their records.
 
+The curated FLEX subset follows the 274 rows in the downloadable PSI-69
+Version 5 CSV (test numbers 1–274); NASA's report describes its first 284
+tests. The current PSI table view reports 275 entries, so the differing scopes
+are documented and kept separate. The CSV's burning-rate heading is `mm`,
+while the NTRS report labels that metric `mm²/s`; the catalog preserves the
+source value and flags the unit discrepancy. NASA's [BRE data access
+page](https://gipoc.grc.nasa.gov/wp/fcf-cir/acme/burning-rate-emulator-bre-operations/)
+requires authorized access, so BRE is linked as research context and has no
+chartable records in this public subset.
+
 ### Agent 1 — Data and backend
 
 - Curate public, source-verifiable FLEX records with stable experiment and

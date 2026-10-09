@@ -11,6 +11,7 @@ Endpoints:
 
 - `GET /api/health`
 - `GET /api/experiments`
+- `GET /api/visualizations?investigation=FLEX`
 - `POST /api/analyze-frames`
 - `POST /api/rank`
 
@@ -49,3 +50,12 @@ weight, evidence value, contribution, and evidence coverage. Missing inputs
 are omitted and the weights are renormalized across available components.
 Area thresholds are prototype settings, so this is intentionally not a
 certified spacecraft hazard score.
+
+`GET /api/visualizations?investigation=FLEX` returns the source-backed FLEX
+records plus chart-ready outcome counts, oxygen-versus-burning-rate points,
+and per-test metric series. Every plotted value includes its experiment ID
+and source link. Missing numeric values are omitted from metric series, and
+burn-time values marked approximate include their qualifier. FLEX aggregates
+are explicitly labeled as reported aggregates with an empty time-series list.
+The response carries the PSI/NTRS burning-rate and composition-label caveats;
+consumers should show these notes anywhere those fields are plotted.

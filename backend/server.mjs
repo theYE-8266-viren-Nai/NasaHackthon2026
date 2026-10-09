@@ -107,6 +107,104 @@ function loadExperiments() {
   return [...parsed, ...curated.filter((experiment) => !csvIds.has(experiment.experiment_id))];
 }
 
+function flexVisualizationData() {
+  const records = loadExperiments().filter((item) => item.investigation?.includes("FLEX"));
+  const outcomes = new Map();
+  for (const record of records) {
+    const key = record.fuel_material + "\u0000" + record.test_end;
+    outcomes.set(key, (outcomes.get(key) ?? 0) + 1);
+  }
+  const outcomeCountsByFuel = [...outcomes.entries()].map(([key, count]) => {
+    const [fuel, outcome] = key.split("\u0000");
+    return { fuel, outcome, count };
+  }).sort((a, b) => (a.fuel < b.fuel ? -1 : a.fuel > b.fuel ? 1 : 0) || (a.outcome < b.outcome ? -1 : a.outcome > b.outcome ? 1 : 0));
+
+  const metric = (key, label, unit) => ({
+    label,
+    unit,
+    values: records.filter((record) => record[key] != null).map((record) => ({
+      experimentId: record.experiment_id,
+      testId: record.test_id,
+      sampleId: record.sample_id,
+      fuel: record.fuel_material,
+      value: record[key],
+      qualifier: record.reported_metric_qualifiers?.[key] ?? null,
+      sourceRowNumber: record.source_row_number,
+      sourceUrl: record.source_url,
+      sourceTitle: record.source_title,
+    })),
+  });
+
+  const oxygenBurningRate = records.filter((record) => record.initial_oxygen_pct != null && record.burning_rate_source_value != null).map((record) => ({
+    experimentId: record.experiment_id,
+    testId: record.test_id,
+    sampleId: record.sample_id,
+    fuel: record.fuel_material,
+    oxygenMoleFraction: record.initial_oxygen_mole_fraction,
+    oxygenPct: record.initial_oxygen_pct,
+    burningRateValue: record.burning_rate_source_value,
+    burningRateUnit: record.reported_metric_units?.burning_rate_source_value,
+    sourceUrl: record.source_url,
+    sourceTitle: record.source_title,
+  }));
+
+  return {
+    investigation: "FLEX",
+    dataset: {
+      title: "NASA PSI-69 Version 5 experimental table (FLEX)",
+      sourceUrl: "https://psi.nasa.gov/physci/repo/data/investigations/PSI-69",
+      sourceDoi: "10.60555/mbq8-0451",
+      reportUrl: "https://ntrs.nasa.gov/citations/20150023456",
+      sourceVersion: 5,
+      recordCount: records.length,
+      testNumberRange: "1–274",
+      duplicateSampleIdentifiers: ["193F001"],
+      scopeNote: "This curated dataset follows the 274 data rows in the downloadable PSI-69 Version 5 experimental table. The PSI table view reports 275 entries, while NASA/TP-2015-216046 reports the first 284 tests; these scopes are not merged.",
+      metricNotes: [
+        "Burning-rate values preserve the PSI CSV source value. Its header says mm; NASA/TP-2015-216046 labels the corresponding metric mm²/s. Confirm the unit reconciliation before interpreting or comparing the axis.",
+        "The PSI CSV composition header says CO; the NTRS report says CO₂. This catalog preserves the source column under a neutral name.",
+        "Initial oxygen percent is derived as reported oxygen mole fraction × 100.",
+        "These are reported test-level aggregates. No time-series measurements are supplied.",
+      ],
+    },
+    outcomeCountsByFuel,
+    oxygenBurningRate,
+    metricSeries: {
+      burningRate: metric("burning_rate_source_value", "PSI reported burning-rate value", "mm (PSI CSV header; NTRS report labels metric mm²/s)"),
+      burnTime: metric("burn_time_s", "Burn time", "s"),
+      initialDropletDiameter: metric("initial_droplet_diameter_mm", "Initial droplet diameter", "mm"),
+      visibleFlameExtinctionDiameter: metric("visible_flame_extinction_diameter_mm", "Visible flame extinction diameter", "mm"),
+    },
+    records: records.map((record) => ({
+      experimentId: record.experiment_id,
+      testId: record.test_id,
+      sampleId: record.sample_id,
+      fuel: record.fuel_material,
+      date: record.date,
+      ambientPressureMmHg: record.ambient_pressure_mmhg,
+      oxygenMoleFraction: record.initial_oxygen_mole_fraction,
+      oxygenPct: record.initial_oxygen_pct,
+      nitrogenMoleFraction: record.initial_nitrogen_mole_fraction,
+      coColumnMoleFraction: record.initial_co_column_mole_fraction,
+      heliumMoleFraction: record.initial_helium_mole_fraction,
+      initialDropletDiameterMm: record.initial_droplet_diameter_mm,
+      visibleFlameExtinctionDiameterMm: record.visible_flame_extinction_diameter_mm,
+      burningRateValue: record.burning_rate_source_value,
+      burningRateUnit: record.reported_metric_units?.burning_rate_source_value,
+      burnTimeS: record.burn_time_s,
+      burnTimeQualifier: record.reported_metric_qualifiers?.burn_time_s ?? null,
+      testEnd: record.test_end,
+      measurementKind: "reported aggregate",
+      measurements: [],
+      sourceRowNumber: record.source_row_number,
+      sourceUrl: record.source_url,
+      sourceTitle: record.source_title,
+      sourceDoi: record.source_doi,
+      sourceDocumentUrl: record.source_document_url,
+    })),
+  };
+}
+
 function findExperiment(id) {
   return loadExperiments().find((item) => item.experiment_id === id) ?? null;
 }
@@ -255,6 +353,13 @@ const server = http.createServer(async (request, response) => {
     if (request.method === "OPTIONS") return send(response, 204, {});
     if (request.method === "GET" && request.url === "/api/health") return send(response, 200, { ok: true, service: "flame-analysis", runtime: "node", version: "0.2.0" });
     if (request.method === "GET" && request.url === "/api/experiments") return send(response, 200, { experiments: loadExperiments() });
+    if (request.method === "GET" && request.url?.split("?", 1)[0] === "/api/visualizations") {
+      const requested = new URL(request.url, "http://localhost").searchParams.get("investigation")?.trim().toLowerCase();
+      if (requested && requested !== "flex" && !requested.includes("flame extinguishment experiment")) {
+        return send(response, 400, { error: "unsupported_investigation", supported: ["FLEX"] });
+      }
+      return send(response, 200, flexVisualizationData());
+    }
     if (request.method === "POST" && ["/api/analyze-frames", "/api/rank"].includes(request.url)) {
       let body = "";
       for await (const chunk of request) body += chunk;
