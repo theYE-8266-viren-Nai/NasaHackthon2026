@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+node_modules/
+.next/
+out/
+.env
+.env.local
+
+# Large research inputs stay local; download them from NASA PSI when needed.
+data/
+videos/

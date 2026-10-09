@@ -1,0 +1,75 @@
+# Flame in Freefall
+
+Flame in Freefall is a prototype dashboard for finding, comparing, and
+understanding NASA microgravity fire experiments. It is designed to turn
+scattered combustion observations into traceable research-review insights for
+human space exploration.
+
+## MVP scope
+
+- Search and filter a curated experiment catalog.
+- Open an experiment detail view with NASA source links.
+- Compare only measurements that are actually available.
+- Show missing measurements explicitly instead of filling them with estimates.
+- Calculate an explainable prototype comparison score.
+- Generate evidence-grounded summaries and decision-support guidance.
+
+The comparison score is not an official NASA safety rating. It prioritizes
+experiments for review and shows the measurements that contributed to the
+result. AI explanations must identify incomplete evidence and cite the NASA
+records or documents they use.
+
+## Project structure
+
+```text
+.
+├── AGENTS.md                 # Team rules, architecture, and workload split
+├── FRONTEND_PROMPT.md        # Dashboard-generation specification
+├── README.md                 # Project overview and development guide
+├── backend/
+│   ├── server.py             # Local flame-frame analysis and ranking API
+│   └── README.md             # Backend endpoints and request format
+├── data/                     # Local NASA CSV files; ignored by Git
+├── videos/                   # Local NASA MP4 files; ignored by Git
+└── dashboard/                # Frontend workspace (Next.js target)
+```
+
+The `data/` and `videos/` directories intentionally remain on the developer
+machine and are excluded from the repository because the research media makes
+the push unnecessarily large. Use NASA's Physical Sciences Informatics
+repository to restore them:
+
+- [Saffire-I / PSI-98](https://psi.nasa.gov/physci/repo/data/investigations/PSI-98)
+- [BASS-II / PSI-25](https://psi.nasa.gov/physci/repo/data/investigations/PSI-25)
+
+## Backend prototype
+
+The local backend uses the bundled Python runtime and accepts sampled JPEG
+frames from the browser. This avoids requiring OpenCV or FFmpeg for the demo.
+
+```powershell
+$py = "C:\Users\yethi\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
+& $py backend/server.py
+```
+
+Available endpoints:
+
+- `GET /api/health`
+- `GET /api/experiments`
+- `POST /api/analyze-frames`
+- `POST /api/rank`
+
+## Frontend direction
+
+The target dashboard is a Next.js + TypeScript app using Tailwind CSS,
+shadcn/ui-style components, Recharts, server-side AI routes, and curated JSON
+data. The frontend should keep API keys on the server and show NASA source
+links beside every substantive finding.
+
+## Demo narrative
+
+1. Select a NASA experiment.
+2. Inspect material, atmosphere, flow, and available measurements.
+3. Compare selected experiments using evidence-only charts.
+4. Review the transparent prototype comparison score.
+5. Ask for a grounded explanation and follow the source links.
