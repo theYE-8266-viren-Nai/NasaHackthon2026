@@ -2,6 +2,7 @@
 
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { Alert, Button, Card, Checkbox, Col, Drawer, Input, Layout, List, Progress, Row, Select, Space, Statistic, Tag, Typography } from "antd";
+import ImmersiveHero from "./components/ImmersiveHero";
 
 const { Header, Content } = Layout;
 const { Title, Text, Paragraph, Link } = Typography;
@@ -80,6 +81,7 @@ export default function Home() {
   return <Layout className="app-shell">
     <Header className="app-header"><div className="brand"><span className="brand-mark">✦</span><span><b>Flame in Freefall</b><small>NASA microgravity fire research</small></span></div><Text type="secondary">API {apiState} · prototype</Text></Header>
     <Content className="content">
+      <ImmersiveHero />
       <section className="hero"><div><Text className="eyebrow">COMBUSTION SCIENCE / DECISION SUPPORT</Text><Title>See how fire behaves when gravity gets out of the way.</Title><Paragraph>Find, compare, and understand NASA microgravity fire experiments. Missing measurements stay visible.</Paragraph></div><Card size="small"><Text type="secondary">STARTING POINT</Text><Title level={3}>Saffire-I</Title><Link href="https://psi.nasa.gov/physci/repo/data/investigations/PSI-98" target="_blank">Open NASA PSI entry ↗</Link></Card></section>
       {apiState === "error" && <Alert message="Experiment API unavailable. Check the dashboard catalog route." type="error" showIcon />}
       <Row gutter={[16, 16]} className="stats"><Col xs={24} md={8}><Card><Statistic title="Experiments indexed" value={data.length} suffix={<Text type="secondary">curated</Text>} /></Card></Col><Col xs={24} md={8}><Card><Statistic title="Materials / groups" value={materials.size} /></Card></Col><Col xs={24} md={8}><Card><Statistic title="Source-backed findings" value={data.filter((item) => item.finding).length} /></Card></Col></Row>
