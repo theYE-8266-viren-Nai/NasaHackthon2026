@@ -1,0 +1,20 @@
+{
+  "results": [
+    {
+      "experiment_id": "FIXTURE_MISSING_DATA",
+      "experiment": {
+        "experiment_id": "FIXTURE_MISSING_DATA",
+        "fuel_material": "Unknown sample",
+        "final_co_ppm": null,
+        "flame_spread_rate_mm_s": null
+      },
+      "analysis": {
+        "frame_count": 3,
+        "state": "growing",
+        "confidence": 0.8,
+        "peak_area_fraction": 0.012,
+        "area_slope_per_second": 0.0004
+      }
+    }
+  ]
+}

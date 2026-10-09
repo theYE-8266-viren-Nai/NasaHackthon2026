@@ -79,10 +79,18 @@ type Experiment = {
   gravityCondition?: string;
   initialOxygenPct?: number;
   finalOxygenPct?: number;
-  airflow?: string;
+  airflowSpeedCmS?: number;
+  flameSpreadRateMmS?: number;
+  burnDurationS?: number;
+  burnLengthCm?: number;
+  averageFlamePowerW?: number;
+  averageFlamePowerUncertaintyW?: number;
   videoPath?: string;
   sourceUrl: string;
   sourceDoi?: string;
+  reportedMetrics?: Record<string, number | null>;
+  // Aggregate reported values are kept separate from frame-derived points.
+  // Only actual time-series samples belong in measurements.
   measurements?: Array<{
     timeS: number;
     flameArea?: number;

@@ -28,12 +28,18 @@ records or documents they use.
 ├── README.md                 # Project overview and development guide
 ├── catalog/
 │   └── experiments.json      # Small, source-traceable demo catalog
+├── scripts/
+│   └── prepare-experiments.mjs # Build dashboard data from the catalog
+├── fixtures/
+│   └── rank-missing-measurements.json # Missing-data ranking request example
 ├── backend/
 │   ├── server.mjs            # Local Node.js flame-frame analysis and ranking API
 │   └── README.md             # Backend endpoints and request format
 ├── data/                     # Local NASA CSV files; ignored by Git
 ├── videos/                   # Local NASA MP4 files; ignored by Git
-└── dashboard/                # Frontend workspace (Next.js target)
+└── dashboard/
+    ├── data/experiments.json # Generated dashboard view of the catalog
+    └── app/                  # Next.js dashboard
 ```
 
 The `data/` and `videos/` directories intentionally remain on the developer
@@ -46,9 +52,14 @@ repository to restore them:
 
 The tracked catalog contains BASS-II tests B1_147 and B3_148 transcribed from
 NASA/TM-20210011385, Appendix A, Table A.1. It is the fallback for
-GET /api/experiments when the local PSI-25 CSV is not present. The catalog
-contains experiment metadata and observations, but no frame-derived flame
-time series. Those values remain absent until sourced from video analysis.
+GET /api/experiments when the local PSI-25 CSV is not present. If the CSV is
+available, the backend returns its rows plus any catalog records not in the
+CSV. The catalog includes Saffire-I tests I-1 and I-2 with NASA-reported
+aggregate flame spread rates and burn durations. No frame-derived flame time
+series is included until source frames are available for analysis.
+
+Run `npm run prepare:data` to generate the dashboard's normalized JSON view.
+Aggregate metrics remain separate from time-series samples.
 
 ## Backend prototype
 
