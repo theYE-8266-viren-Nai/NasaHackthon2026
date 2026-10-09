@@ -1,0 +1,11 @@
+{
+  "name": "flame-in-freefall",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "backend": "node backend/server.mjs"
+  },
+  "dependencies": {
+    "jpeg-js": "^0.4.4"
+  }
+}

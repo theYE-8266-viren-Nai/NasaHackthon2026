@@ -16,23 +16,22 @@ the source experiment or document.
 - Dashboard: Next.js + TypeScript
 - Styling: Tailwind CSS + shadcn/ui
 - Charts: Recharts
-- Data preparation: Python + pandas
+- Data preparation: Node.js/TypeScript with curated JSON or CSV
 - Curated data: versioned JSON or CSV in the repository
 - AI summaries: server-side LLM request with retrieval or selected source
   context
 - Deployment: Vercel
 
 Do not add a separate database or FastAPI service for the hackathon MVP unless
-the team explicitly agrees. The existing `backend/server.py` is a validated
-analysis prototype and may be used locally, but the preferred final demo is a
-Next.js app with server routes and a small Python preprocessing step.
+the team explicitly agrees. The Node.js backend in `backend/server.mjs` keeps
+the analysis contract local and easy to integrate with Next.js.
 
 ## Two-person workload split
 
 ### Agent A: data and analysis owner
 
 - Curate the initial NASA experiment subset.
-- Maintain the Python preparation script.
+- Maintain the Node.js/TypeScript preparation and analysis code.
 - Normalize experiment IDs, units, missing values, and source links.
 - Produce `experiments.json` and any chart-ready time-series files.
 - Maintain the flame-feature extraction and deterministic review-priority logic.
@@ -56,6 +55,15 @@ Next.js app with server routes and a small Python preprocessing step.
 - Review one another's work at the halfway point and before the demo.
 - Prefer a small working subset over an incomplete all-NASA catalog.
 - Do not present prototype review priority as a validated hazard probability.
+
+## Branching rule
+
+- Agent A works from `agenta` and creates feature branches as
+  `agenta/<feature>`.
+- Agent B works from `agentb` and creates feature branches as
+  `agentb/<feature>`.
+- Do not commit feature work directly to `main`.
+- Pull or rebase from the relevant agent base branch before opening a merge.
 
 ## Data contract
 

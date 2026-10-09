@@ -14,7 +14,7 @@ Data and analysis contract:
   typed data module.
 - Expose equivalent Next.js routes such as `/api/experiments`,
   `/api/analyze`, `/api/rank`, and `/api/ask`.
-- The existing local Python analysis prototype may be called during
+- The existing local Node.js analysis prototype may be called during
   development, but the final dashboard must have a clear server-side route
   boundary and must not depend on browser-side secrets.
 

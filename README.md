@@ -27,7 +27,7 @@ records or documents they use.
 ├── FRONTEND_PROMPT.md        # Dashboard-generation specification
 ├── README.md                 # Project overview and development guide
 ├── backend/
-│   ├── server.py             # Local flame-frame analysis and ranking API
+│   ├── server.mjs            # Local Node.js flame-frame analysis and ranking API
 │   └── README.md             # Backend endpoints and request format
 ├── data/                     # Local NASA CSV files; ignored by Git
 ├── videos/                   # Local NASA MP4 files; ignored by Git
@@ -44,12 +44,12 @@ repository to restore them:
 
 ## Backend prototype
 
-The local backend uses the bundled Python runtime and accepts sampled JPEG
-frames from the browser. This avoids requiring OpenCV or FFmpeg for the demo.
+The local backend uses Node.js and accepts sampled JPEG frames from the browser.
+This avoids requiring FFmpeg for the demo.
 
 ```powershell
-$py = "C:\Users\yethi\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
-& $py backend/server.py
+npm install
+npm run backend
 ```
 
 Available endpoints:

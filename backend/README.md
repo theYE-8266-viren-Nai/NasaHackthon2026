@@ -1,10 +1,10 @@
-# Flame analysis backend
+# Flame analysis Node.js backend
 
 ## Run
 
 ```powershell
-$py = "C:\Users\yethi\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
-& $py backend/server.py
+npm install
+npm run backend
 ```
 
 Endpoints:
@@ -15,8 +15,9 @@ Endpoints:
 - `POST /api/rank`
 
 The frontend should decode the MP4 in the browser, sample frames to JPEG, and
-send them to `/api/analyze-frames` as JSON. This avoids requiring OpenCV or an
-FFmpeg installation on the demo machine.
+send them to `/api/analyze-frames` as JSON. This avoids requiring FFmpeg or
+native image binaries on the demo machine. Node.js uses the pure-JavaScript
+`jpeg-js` decoder for sampled JPEG frames.
 
 Example request shape:
 
