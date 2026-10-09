@@ -78,19 +78,18 @@ function MagneticButton({ children, href, primary = false }: { children: ReactNo
 
 export default function ImmersiveHero() {
   const { scrollY } = useScroll();
-  const canvasY = useTransform(scrollY, [0, 650], [0, 115]);
   const titleY = useTransform(scrollY, [0, 650], [0, -50]);
   const reduceMotion = useReducedMotion();
   return <section className="immersive-hero" aria-labelledby="page-title">
-    {reduceMotion ? <div className="hero-canvas reduced-canvas" aria-hidden="true" /> : <motion.div className="hero-canvas" style={{ y: canvasY }} aria-hidden="true">
-      <Canvas dpr={[1, 1.45]} camera={{ position: [0, 0, 7], fov: 40 }} gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}>
+    {reduceMotion ? <div className="hero-canvas reduced-canvas" aria-hidden="true" /> : <div className="hero-canvas" aria-hidden="true">
+      <Canvas dpr={[1, 1.3]} camera={{ position: [0, 0, 7], fov: 40 }} gl={{ alpha: true, antialias: true, powerPreference: "low-power" }}>
         <ambientLight intensity={0.5} />
         <pointLight position={[2, 1, 4]} color="#ffad73" intensity={9} distance={8} />
         <pointLight position={[-3, 1, 2]} color="#7dbbd5" intensity={7} distance={7} />
         <ParticleField />
         <OrbitalFlame />
       </Canvas>
-    </motion.div>}
+    </div>}
     <motion.div className="hero-copy immersive-copy" style={{ y: titleY }}>
       <Text className="eyebrow">MICROGRAVITY COMBUSTION / RESEARCH INDEX</Text>
       <Title id="page-title">Fire behaves differently when buoyancy disappears.</Title>
