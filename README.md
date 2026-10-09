@@ -85,6 +85,69 @@ server-side AI routes, and curated JSON data. The frontend should keep API
 keys on the server and show NASA source links beside every substantive
 finding.
 
+## Next tasks: NASA data visualizations
+
+Build the next dashboard iteration around source-traceable NASA combustion
+measurements. Start with the existing BASS-II and Saffire-I records, and add
+FLEX as the first quantitative dataset for cross-record visualizations where
+the measurements are compatible.
+
+NASA sources for this work:
+
+- [FLEX / PSI-69 dataset](https://psi.nasa.gov/physci/repo/data/investigations/PSI-69)
+- [FLEX NTRS report 20150023456](https://ntrs.nasa.gov/citations/20150023456)
+- [ACME mission](https://science.nasa.gov/mission/acme/)
+- [Burning Rate Emulator (BRE)](https://science.nasa.gov/biological-physical/investigations/bre/)
+
+The current PSI-69 table and the cited NTRS report describe different test
+counts and may represent different data scopes or versions. Verify the source
+scope before combining or comparing their records.
+
+### Agent 1 — Data and backend
+
+- Curate public, source-verifiable FLEX records with stable experiment and
+  test IDs, original units, explicit missing values, and NASA source links.
+- Preserve the distinction between reported aggregate metrics and actual
+  time-series measurements; provide normalized, chart-ready data through the
+  existing Node.js backend/API contract.
+- Verify whether public ACME BRE test data is available. If it cannot be
+  verified from an accessible NASA source, include BRE as linked research
+  context only; do not use restricted data or create measurements.
+- Validate source metadata, units, and missing-value handling for the curated
+  subset. Keep BASS-II, Saffire-I, and FLEX measurements separate where their
+  definitions or units are incompatible.
+
+### Agent 2 — Dashboard and charts
+
+- Add interactive Recharts views with investigation and metric selection,
+  useful filters, readable tooltips, and nearby NASA source references.
+- Visualize FLEX outcome counts by fuel, oxygen versus reported burning rate
+  when both values exist, and selectable summaries of reported metrics such as
+  burning rate, burn time, and flame extinction diameter.
+- Keep investigations separate when measurements are incompatible. Use line
+  charts only for actual time-series data, and label frame-derived series as
+  video analysis rather than NASA-reported measurements.
+- Provide clear loading, empty, missing-data, and error states; make charts
+  usable on mobile screens.
+
+### Shared evidence and safety requirements
+
+- Ground AI explanations in the selected NASA records or documents and show
+  citations and limitations with each substantive result.
+- Exclude missing values from calculations and identify them in the interface.
+- Label prototype ranking as “review priority”; it is not a NASA-approved
+  hazard rating or a substitute for spacecraft fire-safety analysis.
+
+### Acceptance criteria
+
+- Every plotted value can be traced to a NASA record with its ID, unit, and
+  source.
+- Incompatible datasets are not pooled, and reported aggregates are not
+  presented as time-series samples.
+- Charts clearly distinguish reported measurements from frame-derived data
+  and explain when evidence is missing or unavailable.
+- AI explanations cite the selected evidence and state when it is insufficient.
+
 ## Demo narrative
 
 1. Select a NASA experiment.
