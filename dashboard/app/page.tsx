@@ -6,6 +6,7 @@ import {
   Row, Select, Space, Spin, Tag, Typography
 } from "antd";
 import { ArrowUpRight, Filter, Flame, Search, ShieldCheck } from "lucide-react";
+import ImmersiveHero from "./components/ImmersiveHero";
 
 const { Header, Content } = Layout;
 const { Title, Text, Paragraph, Link } = Typography;
@@ -144,10 +145,7 @@ export default function Home() {
         <div className="header-status"><span className={status === "ready" ? "live-dot" : "muted-dot"} /> {status === "ready" ? "Catalog live" : "Catalog loading"}</div>
       </Header>
       <Content className="content">
-        <section className="hero" aria-labelledby="page-title">
-          <div className="hero-copy"><Text className="eyebrow">MICROGRAVITY COMBUSTION / RESEARCH INDEX</Text><Title id="page-title">Fire behaves differently when buoyancy disappears.</Title><Paragraph>Trace NASA’s experiments from raw conditions to defensible insight. Search the catalog, compare only what was measured, and keep uncertainty in view.</Paragraph><Space className="hero-actions" wrap><Button type="primary" href="#catalog" icon={<Search size={16} />}>Explore the catalog</Button><Button href="https://psi.nasa.gov/physci/repo/data/investigations/PSI-98" target="_blank" icon={<ArrowUpRight size={15} />}>Open Saffire-I source</Button></Space></div>
-          <aside className="hero-note"><div className="note-line"><ShieldCheck size={17} /><span>Evidence-led by design</span></div><Title level={3}>No invented measurements.</Title><Paragraph>Values shown here come from the curated NASA record. When a field is absent, the interface says so.</Paragraph><Text className="source-caption">STARTING POINT</Text><Link href="https://psi.nasa.gov/physci/repo/data/investigations/PSI-98" target="_blank">Saffire-I / PSI-98 <ArrowUpRight size={13} /></Link></aside>
-        </section>
+        <ImmersiveHero />
         <section className="stat-rail" aria-label="Catalog summary"><div><Text className="stat-label">Experiments indexed</Text><strong>{data.length}</strong><Text> curated records</Text></div><div><Text className="stat-label">Material groups</Text><strong>{materials.size}</strong><Text> in the current slice</Text></div><div><Text className="stat-label">Source-backed findings</Text><strong>{data.filter((item) => item.finding).length}</strong><Text> with provenance</Text></div></section>
         <section id="catalog" className="research-layout" aria-labelledby="catalog-heading">
           <aside className="filter-rail"><div className="section-kicker"><Filter size={14} /> REFINE THE EVIDENCE</div><Title id="catalog-heading" level={2}>Find an experiment</Title><label htmlFor="search">Search the catalog</label><Input id="search" aria-label="Search experiments" prefix={<Search size={15} />} placeholder="Material, test, finding" value={query} onChange={(event) => setQuery(event.target.value)} /><label htmlFor="investigation">Investigation</label><Select id="investigation" aria-label="Filter by investigation" value={investigation} onChange={setInvestigation} options={[{ value: "all", label: "All investigations" }, ...investigations]} /><label htmlFor="measurement">Available measurement</label><Select id="measurement" aria-label="Filter by available measurement" value={measurement} onChange={setMeasurement} options={[{ value: "all", label: "Any measurement" }, ...measurements]} /><Divider /><Text type="secondary">Select up to three rows to open a comparison sheet. Numeric scores are transparent and provisional.</Text></aside>
