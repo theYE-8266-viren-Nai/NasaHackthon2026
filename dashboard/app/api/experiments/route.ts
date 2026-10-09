@@ -17,12 +17,12 @@ function normalize(record: CatalogRecord) {
   ].filter(Boolean);
   return {
     id: record.experiment_id,
-    investigation: "BASS-II",
-    title: record.fuel_material ?? record.experiment_id,
+    investigation: record.investigation ?? "BASS-II",
+    title: record.title ?? record.fuel_material ?? record.experiment_id,
     material: record.fuel_material ?? "Unknown material",
-    condition: [record.flow_configuration, record.flow_restrictor, record.fan_display ? "fan " + record.fan_display : null].filter(Boolean).join(" · "),
+    condition: [record.flow_configuration, record.flow_restrictor, record.fan_display ? "fan " + record.fan_display : null].filter(Boolean).join(" · ") || "Investigation-level record",
     gravity: "Microgravity",
-    measurements,
+    measurements: Array.isArray(record.measurements) && record.measurements.length ? record.measurements : measurements,
     initialOxygenPct: record.initial_oxygen_pct ?? null,
     finalOxygenPct: record.final_oxygen_pct ?? null,
     initialCoPpm: record.initial_co_ppm ?? null,
