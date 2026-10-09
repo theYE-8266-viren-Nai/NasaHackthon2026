@@ -75,6 +75,7 @@ Available endpoints:
 
 - `GET /api/health`
 - `GET /api/experiments`
+- `GET /api/visualizations?investigation=FLEX`
 - `POST /api/analyze-frames`
 - `POST /api/rank`
 

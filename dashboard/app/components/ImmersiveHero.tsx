@@ -1,111 +1,101 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, MeshTransmissionMaterial, Points, PointMaterial } from "@react-three/drei";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { Float, Points, PointMaterial } from "@react-three/drei";
+import { motion, useReducedMotion } from "framer-motion";
 import * as THREE from "three";
-import { useMemo, useRef } from "react";
-import type { MouseEvent, ReactNode } from "react";
-import { ArrowUpRight, Flame, Search, ShieldCheck } from "lucide-react";
-import { Space, Typography } from "antd";
-
-const { Title, Text, Paragraph, Link } = Typography;
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowDown, ArrowUpRight } from "lucide-react";
 
 function ParticleField() {
   const points = useRef<THREE.Points>(null);
   const positions = useMemo(() => {
-    const values = new Float32Array(720 * 3);
-    for (let index = 0; index < 720; index += 1) {
-      const radius = 2.2 + ((index * 17) % 100) / 100 * 2.7;
+    const values = new Float32Array(420 * 3);
+    for (let index = 0; index < 420; index += 1) {
       const angle = index * 2.39996;
+      const radius = 2.1 + ((index * 29) % 100) / 100 * 3.9;
       values[index * 3] = Math.cos(angle) * radius;
-      values[index * 3 + 1] = Math.sin(angle * 1.13) * 1.7;
-      values[index * 3 + 2] = Math.sin(angle) * radius - 1.5;
+      values[index * 3 + 1] = Math.sin(angle * 1.27) * 2.8;
+      values[index * 3 + 2] = Math.sin(angle) * radius - 1.4;
     }
     return values;
   }, []);
 
   useFrame((state, delta) => {
-    if (!points.current) return;
-    points.current.rotation.y = THREE.MathUtils.lerp(points.current.rotation.y, state.pointer.x * 0.18 + state.clock.elapsedTime * 0.035, delta * 2);
-    points.current.rotation.x = THREE.MathUtils.lerp(points.current.rotation.x, state.pointer.y * 0.12, delta * 2);
+    if (points.current) points.current.rotation.y += delta * 0.012;
+    if (points.current) points.current.rotation.x = THREE.MathUtils.lerp(points.current.rotation.x, state.pointer.y * 0.035, delta);
   });
 
   return <Points ref={points} positions={positions} stride={3} frustumCulled>
-    <PointMaterial transparent color="#a9d5e7" size={0.025} sizeAttenuation depthWrite={false} opacity={0.62} />
+    <PointMaterial transparent color="#d7e4f3" size={0.018} sizeAttenuation depthWrite={false} opacity={0.58} />
   </Points>;
 }
 
-function OrbitalFlame() {
+function FlameTelemetryCore() {
   const group = useRef<THREE.Group>(null);
   useFrame((state, delta) => {
     if (!group.current) return;
-    group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, state.pointer.y * 0.12, delta * 1.5);
-    group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, state.pointer.x * 0.2 + state.clock.elapsedTime * 0.08, delta * 1.5);
+    group.current.rotation.y += delta * 0.045;
+    group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, state.pointer.y * 0.07, delta * 1.5);
   });
   return <group ref={group}>
-    <Float speed={1.25} rotationIntensity={0.35} floatIntensity={0.55}>
+    <Float speed={0.7} rotationIntensity={0.08} floatIntensity={0.18}>
       <mesh>
-        <icosahedronGeometry args={[1.25, 2]} />
-        <MeshTransmissionMaterial backside thickness={0.25} roughness={0.16} chromaticAberration={0.08} anisotropy={0.25} color="#e8925d" transmission={0.88} />
+        <icosahedronGeometry args={[1.14, 2]} />
+        <meshBasicMaterial color="#ff5722" wireframe transparent opacity={0.55} />
       </mesh>
-      <mesh scale={1.03}>
-        <icosahedronGeometry args={[1.25, 2]} />
-        <meshBasicMaterial color="#ffad73" transparent opacity={0.14} wireframe />
+      <mesh scale={0.68}>
+        <icosahedronGeometry args={[1, 1]} />
+        <meshBasicMaterial color="#ff713f" transparent opacity={0.12} />
       </mesh>
     </Float>
-    <mesh rotation={[Math.PI / 2.4, 0.2, 0.1]} scale={1.75}>
-      <torusGeometry args={[1.05, 0.008, 8, 96]} />
-      <meshBasicMaterial color="#d4ecf5" transparent opacity={0.42} />
+    <mesh rotation={[Math.PI / 2.15, 0.2, 0.1]} scale={1.62}>
+      <torusGeometry args={[1.05, 0.006, 6, 80]} />
+      <meshBasicMaterial color="#f4f4f4" transparent opacity={0.34} />
     </mesh>
-    <mesh rotation={[0.3, Math.PI / 2.1, 0.3]} scale={1.45}>
-      <torusGeometry args={[1.05, 0.005, 8, 96]} />
-      <meshBasicMaterial color="#ff9d5c" transparent opacity={0.5} />
+    <mesh rotation={[0.3, Math.PI / 2.1, 0.3]} scale={1.34}>
+      <torusGeometry args={[1.05, 0.005, 6, 80]} />
+      <meshBasicMaterial color="#ff5722" transparent opacity={0.72} />
     </mesh>
   </group>;
 }
 
-function MagneticButton({ children, href, primary = false }: { children: ReactNode; href: string; primary?: boolean }) {
-  const handleMove = (event: MouseEvent<HTMLAnchorElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - rect.left - rect.width / 2) * 0.12;
-    const y = (event.clientY - rect.top - rect.height / 2) * 0.12;
-    event.currentTarget.style.setProperty("--mag-x", x + "px");
-    event.currentTarget.style.setProperty("--mag-y", y + "px");
-  };
-  return <a className={primary ? "magnetic-button primary" : "magnetic-button"} href={href} onMouseMove={handleMove} onMouseLeave={(event) => { event.currentTarget.style.setProperty("--mag-x", "0px"); event.currentTarget.style.setProperty("--mag-y", "0px"); }}>{children}</a>;
-}
-
 export default function ImmersiveHero() {
-  const { scrollY } = useScroll();
-  const titleY = useTransform(scrollY, [0, 650], [0, -50]);
   const reduceMotion = useReducedMotion();
-  return <section className="immersive-hero" aria-labelledby="page-title">
+  const heroRef = useRef<HTMLElement>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const element = heroRef.current;
+    if (!element || !("IntersectionObserver" in window)) { setInView(true); return; }
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { rootMargin: "80px 0px", threshold: 0 });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  return <section ref={heroRef} className="immersive-hero" id="about" aria-labelledby="page-title">
     {reduceMotion ? <div className="hero-canvas reduced-canvas" aria-hidden="true" /> : <div className="hero-canvas" aria-hidden="true">
-      <Canvas dpr={[1, 1.3]} camera={{ position: [0, 0, 7], fov: 40 }} gl={{ alpha: true, antialias: true, powerPreference: "low-power" }}>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[2, 1, 4]} color="#ffad73" intensity={9} distance={8} />
-        <pointLight position={[-3, 1, 2]} color="#7dbbd5" intensity={7} distance={7} />
+      {inView && <Canvas dpr={1.15} frameloop="always" camera={{ position: [0, 0, 7], fov: 43 }} gl={{ alpha: true, antialias: false, powerPreference: "low-power" }}>
         <ParticleField />
-        <OrbitalFlame />
-      </Canvas>
+        <FlameTelemetryCore />
+      </Canvas>}
     </div>}
-    <motion.div className="hero-copy immersive-copy" style={{ y: titleY }}>
-      <Text className="eyebrow">MICROGRAVITY COMBUSTION / RESEARCH INDEX</Text>
-      <Title id="page-title">Fire behaves differently when buoyancy disappears.</Title>
-      <Paragraph>Trace NASA’s experiments from raw conditions to defensible insight. Search the catalog, compare only what was measured, and keep uncertainty in view.</Paragraph>
-      <Space className="hero-actions" wrap>
-        <MagneticButton primary href="#catalog"><Search size={16} /> Explore the catalog</MagneticButton>
-        <MagneticButton href="https://psi.nasa.gov/physci/repo/data/investigations/PSI-98"><ArrowUpRight size={15} /> Open Saffire-I source</MagneticButton>
-      </Space>
+    <div className="hero-grid-overlay" aria-hidden="true" />
+    <motion.div className="hero-copy" initial={reduceMotion ? false : { opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+      <p className="eyebrow"><span className="signal-dot" /> MICROGRAVITY COMBUSTION / RESEARCH INDEX</p>
+      <h1 id="page-title"><span className="hero-actions-line">Explore <i>•</i> Research <i>•</i> Present <i>•</i> Share <i>•</i> Teach</span><span className="hero-title-tail">a Universe of Data</span></h1>
+      <p className="hero-description">Turn NASA’s microgravity fire experiments into clear, source-linked evidence. Compare reported conditions, inspect missing measurements, and explore what the data can—and cannot—support for spacecraft fire safety.</p>
+      <div className="hero-actions">
+        <a className="tactical-button tactical-button-primary" href="#catalog">EXPLORE FIRE DATA <ArrowDown size={15} aria-hidden="true" /></a>
+        <a className="tactical-button" href="https://psi.nasa.gov/physci/repo/data/investigations/PSI-69" target="_blank" rel="noreferrer">OPEN NASA PSI <ArrowUpRight size={15} aria-hidden="true" /></a>
+      </div>
+      <div className="hero-source-ribbon" id="sources">
+        <span className="ribbon-label">NASA DATA SOURCES</span>
+        <div className="source-emblems" aria-label="NASA Physical Sciences Informatics, NASA Technical Reports Server, and ISS combustion experiments">
+          <span><b>PSI</b><small>PHYSICAL SCIENCES<br />INFORMATICS</small></span>
+          <span><b>NTRS</b><small>NASA TECHNICAL<br />REPORTS SERVER</small></span>
+          <span><b>ISS / CIR</b><small>COMBUSTION<br />INTEGRATED RACK</small></span>
+        </div>
+      </div>
     </motion.div>
-    <motion.aside className="hero-note immersive-note" initial={{ opacity: 0, x: 26 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35, duration: 0.8 }}>
-      <div className="note-line"><ShieldCheck size={17} /><span>Evidence-led by design</span></div>
-      <Title level={3}>No invented measurements.</Title>
-      <Paragraph>Values shown here come from the curated NASA record. When a field is absent, the interface says so.</Paragraph>
-      <Text className="source-caption">STARTING POINT</Text>
-      <Link href="https://psi.nasa.gov/physci/repo/data/investigations/PSI-98" target="_blank">Saffire-I / PSI-98 <ArrowUpRight size={13} /></Link>
-      <div className="hero-orbit-caption"><Flame size={14} /> interactive combustion field</div>
-    </motion.aside>
+    <div className="hero-readout" aria-hidden="true"><span>MISSION / FIRE SAFETY</span><b>0G</b><small>MEASURE · TRACE · REVIEW</small></div>
   </section>;
 }

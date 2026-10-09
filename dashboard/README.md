@@ -1,6 +1,6 @@
 # Flame in Freefall dashboard
 
-Next.js + TypeScript dashboard for exploring NASA microgravity combustion records. The dashboard API reads the versioned source catalog at `../catalog/experiments.json`. Ranking and frame analysis are delegated to the Node service in `../backend/server.mjs`.
+Next.js + TypeScript dashboard for exploring NASA microgravity combustion records. The dashboard API reads the versioned source catalog at `../catalog/experiments.json`. `GET /api/visualizations?investigation=FLEX` provides chart-ready NASA source records, outcome counts, and oxygen/burning-rate points with source links and unit notes. Ranking and frame analysis are delegated to the Node service in `../backend/server.mjs`.
 
 ## Run locally
 
@@ -28,11 +28,12 @@ The key is read only by the server route. Responses link the NASA source documen
 
 ## Demo flow
 
-1. Search for `Saffire-I` and select I-1 and I-2.
-2. Open **Details** on each record to show flow configuration, reported measurements, missing values, provenance, and NASA source links.
-3. Review the backend-ranked comparison. Explain that the score is a prototype research-review priority with evidence coverage, not a safety rating.
-4. Ask what differs between the selected runs. The answer uses those catalog records and links their NASA sources.
-5. Select an experiment, choose a local video, and inspect its sampled-frame flame-area trend. The curated catalog currently has no video files, so use a NASA video downloaded in advance if one is available to the team.
+1. Review the FLEX PSI-69 outcome and oxygen/burning-rate charts, and open their source links. The burning-rate axis preserves the PSI CSV value label and displays its discrepancy with the NTRS report.
+2. Search for `Saffire-I` and select I-1 and I-2.
+3. Open **Details** on each record to show flow configuration, reported measurements, missing values, provenance, and NASA source links.
+4. Review the backend-ranked comparison. Explain that the score is a prototype research-review priority with evidence coverage, not a safety rating.
+5. Ask what differs between the selected runs. The answer uses those catalog records and links their NASA sources.
+6. Select an experiment, choose a local video, and inspect its sampled-frame flame-area trend. The curated catalog currently has no video files, so use a NASA video downloaded in advance if one is available to the team.
 
 ## Deployment
 
