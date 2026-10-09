@@ -32,7 +32,7 @@ function ParticleField() {
   });
 
   return <Points ref={points} positions={positions} stride={3} frustumCulled>
-    <PointMaterial transparent color="#a9d5e7" size={0.025} sizeAttenuation depthWrite={false} opacity={0.62} />
+    <PointMaterial transparent color="#FFB000" size={0.025} sizeAttenuation depthWrite={false} opacity={0.82} />
   </Points>;
 }
 
@@ -47,20 +47,20 @@ function OrbitalFlame() {
     <Float speed={1.25} rotationIntensity={0.35} floatIntensity={0.55}>
       <mesh>
         <icosahedronGeometry args={[1.25, 2]} />
-        <MeshTransmissionMaterial backside thickness={0.25} roughness={0.16} chromaticAberration={0.08} anisotropy={0.25} color="#e8925d" transmission={0.88} />
+        <MeshTransmissionMaterial backside thickness={0.25} roughness={0.16} chromaticAberration={0.08} anisotropy={0.25} color="#FF5500" transmission={0.88} />
       </mesh>
       <mesh scale={1.03}>
         <icosahedronGeometry args={[1.25, 2]} />
-        <meshBasicMaterial color="#ffad73" transparent opacity={0.14} wireframe />
+        <meshBasicMaterial color="#FFB000" transparent opacity={0.24} wireframe />
       </mesh>
     </Float>
     <mesh rotation={[Math.PI / 2.4, 0.2, 0.1]} scale={1.75}>
       <torusGeometry args={[1.05, 0.008, 8, 96]} />
-      <meshBasicMaterial color="#d4ecf5" transparent opacity={0.42} />
+      <meshBasicMaterial color="#FFFFFF" transparent opacity={0.56} />
     </mesh>
     <mesh rotation={[0.3, Math.PI / 2.1, 0.3]} scale={1.45}>
       <torusGeometry args={[1.05, 0.005, 8, 96]} />
-      <meshBasicMaterial color="#ff9d5c" transparent opacity={0.5} />
+      <meshBasicMaterial color="#FF5500" transparent opacity={0.8} />
     </mesh>
   </group>;
 }
@@ -84,8 +84,8 @@ export default function ImmersiveHero() {
     {reduceMotion ? <div className="hero-canvas reduced-canvas" aria-hidden="true" /> : <div className="hero-canvas" aria-hidden="true">
       <Canvas dpr={[1, 1.3]} camera={{ position: [0, 0, 7], fov: 40 }} gl={{ alpha: true, antialias: true, powerPreference: "low-power" }}>
         <ambientLight intensity={0.5} />
-        <pointLight position={[2, 1, 4]} color="#ffad73" intensity={9} distance={8} />
-        <pointLight position={[-3, 1, 2]} color="#7dbbd5" intensity={7} distance={7} />
+        <pointLight position={[2, 1, 4]} color="#FF5500" intensity={12} distance={8} />
+        <pointLight position={[-3, 1, 2]} color="#FFB000" intensity={9} distance={7} />
         <ParticleField />
         <OrbitalFlame />
       </Canvas>
