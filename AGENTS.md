@@ -14,7 +14,7 @@ the source experiment or document.
 ## Recommended architecture
 
 - Dashboard: Next.js + TypeScript
-- Styling: Tailwind CSS + shadcn/ui
+- Styling: Ant Design
 - Charts: Recharts
 - Data preparation: Node.js/TypeScript with curated JSON or CSV
 - Curated data: versioned JSON or CSV in the repository
@@ -40,7 +40,7 @@ the analysis contract local and easy to integrate with Next.js.
 
 ### Agent B: product and dashboard owner
 
-- Create the Next.js + TypeScript application.
+- Create the Next.js + TypeScript application using Ant Design components.
 - Build the dashboard layout, experiment selector, comparison view, charts,
   ranking cards, and source-reference panel.
 - Implement server-side API routes for AI summaries and retrieval.

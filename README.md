@@ -61,10 +61,10 @@ Available endpoints:
 
 ## Frontend direction
 
-The target dashboard is a Next.js + TypeScript app using Tailwind CSS,
-shadcn/ui-style components, Recharts, server-side AI routes, and curated JSON
-data. The frontend should keep API keys on the server and show NASA source
-links beside every substantive finding.
+The target dashboard is a Next.js + TypeScript app using Ant Design, Recharts,
+server-side AI routes, and curated JSON data. The frontend should keep API
+keys on the server and show NASA source links beside every substantive
+finding.
 
 ## Demo narrative
 
