@@ -1,7 +1,7 @@
 # Frontend generation prompt
 
 Build a polished Next.js + TypeScript dashboard for the Flame in Freefall
-prototype. Use Tailwind CSS, shadcn/ui-style components, and Recharts.
+prototype. Use Ant Design components and Recharts.
 Keep AI calls in server-side Next.js route handlers so API keys never reach the
 browser. Deployability on Vercel is a requirement.
 
