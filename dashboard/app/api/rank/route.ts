@@ -1,32 +1,17 @@
 import { NextResponse } from "next/server";
 
-type RankItem = {
-  id?: string;
-  initialOxygenPct?: number | null;
-  finalOxygenPct?: number | null;
-  initialCoPpm?: number | null;
-  finalCoPpm?: number | null;
-};
-
-function score(item: RankItem) {
-  const oxygen = item.initialOxygenPct == null || item.finalOxygenPct == null ? null : Math.abs(item.finalOxygenPct - item.initialOxygenPct) * 20;
-  const co = item.initialCoPpm == null || item.finalCoPpm == null ? null : Math.max(0, item.finalCoPpm - item.initialCoPpm) / 2;
-  const values = [oxygen, co].filter((value): value is number => value != null);
-  return values.length ? Math.round(values.reduce((a, b) => a + b, 0) / values.length) : null;
-}
-
 export async function POST(request: Request) {
-  const body = await request.json() as { experiments?: RankItem[] };
-  const ranked = (body.experiments ?? []).map((item) => ({
-    experiment_id: item.id,
-    score: score(item),
-    evidence: [
-      item.initialOxygenPct != null && item.finalOxygenPct != null ? "oxygen change" : null,
-      item.initialCoPpm != null && item.finalCoPpm != null ? "CO change" : null
-    ].filter(Boolean)
-  })).sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
-  return NextResponse.json({
-    ranked,
-    warning: "Prototype comparison score, not an official NASA safety rating. Missing measurements are omitted."
-  });
+  const backendUrl = process.env.ANALYSIS_BACKEND_URL ?? "http://localhost:8000";
+  try {
+    const body = await request.json() as { experiments?: Array<{ id?: string }> };
+    const response = await fetch(backendUrl + "/api/rank", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ results: (body.experiments ?? []).map((item) => ({ experiment_id: item.id, analysis: {} })) }),
+      cache: "no-store"
+    });
+    return new NextResponse(await response.text(), { status: response.status, headers: { "Content-Type": "application/json" } });
+  } catch {
+    return NextResponse.json({ error: "Ranking backend unavailable. Start the Node.js backend on port 8000." }, { status: 503 });
+  }
 }

@@ -21,10 +21,16 @@ native image binaries on the demo machine. Node.js uses the pure-JavaScript
 
 `GET /api/experiments` reads the tracked `catalog/experiments.json` demo records.
 If the local ignored PSI-25 experimental table exists at
-`data/PSI-25_Experimental table_BASS-II.csv`, it returns the full table and
-enriches matching demo records with source notes. CSV-only records link to the
-NASA PSI-25 investigation page. Numeric flame measurements are populated only
-by `/api/analyze-frames`; the curated catalog does not invent time-series data.
+`data/PSI-25_Experimental table_BASS-II.csv`, it returns the full table plus
+curated records that are not in that table, enriching matching demo rows with
+source notes. CSV-only records link to the NASA PSI-25 investigation page.
+Numeric flame measurements are populated only by `/api/analyze-frames`; the
+curated catalog does not invent time-series data.
+The catalog also contains NASA-reported Saffire-I summary rates and durations;
+these are separate scalar fields and are not expanded into synthetic flame
+traces. The image heuristic checks both warm and blue flame-colored pixels;
+its confidence value is explicitly a trend heuristic, not a calibrated
+probability.
 
 Example request shape:
 

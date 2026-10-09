@@ -10,12 +10,33 @@ const CURATED_PATH = path.join(ROOT, "catalog", "experiments.json");
 
 function clean(value) {
   const text = String(value ?? "").trim();
-  return text && !["none", "nan", "n/a"].includes(text.toLowerCase()) ? text : null;
+  return text && !["-", "--", "---", "n/a", "na", "nan", "none", "null", "not available", "not reported", "unknown"].includes(text.toLowerCase()) ? text : null;
 }
 
 function number(value) {
-  const match = String(value ?? "").match(/-?\d+(?:\.\d+)?/);
-  return match ? Number(match[0]) : null;
+  const text = clean(value)?.replace(/[−–]/g, "-").replace(/,/g, "");
+  if (!text) return null;
+  const match = text.match(/^([+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)(?:\s*[a-zA-Z%µμ/².^_-]*)?$/i);
+  if (!match) return null;
+  const parsed = Number(match[1]);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function normalizedHeader(value) {
+  return String(value ?? "").normalize("NFKC").toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+function column(row, ...aliases) {
+  const requested = new Set(aliases.map(normalizedHeader));
+  const key = Object.keys(row).find((header) => requested.has(normalizedHeader(header)));
+  return key == null ? null : clean(row[key]);
+}
+
+function isoDate(value) {
+  const text = clean(value);
+  if (!text) return null;
+  const us = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  return us ? us[3] + "-" + us[1].padStart(2, "0") + "-" + us[2].padStart(2, "0") : text;
 }
 
 function parseCsvLine(line) {
@@ -41,11 +62,11 @@ function loadExperiments() {
   const lines = fs.readFileSync(CSV_PATH, "utf8").replace(/^\uFEFF/, "").split(/\r?\n/).filter(Boolean);
   const headers = parseCsvLine(lines.shift());
   const curatedById = new Map(curated.map((item) => [item.experiment_id, item]));
-  return lines.map((line) => {
+  const parsed = lines.map((line) => {
     const values = parseCsvLine(line);
     const row = Object.fromEntries(headers.map((header, i) => [header, values[i] ?? ""]));
-    const test = clean(row["Test #"]) ?? "unknown";
-    const sample = clean(row["Sample #"]) ?? "unknown";
+    const test = column(row, "Test #", "Test") ?? "unknown";
+    const sample = column(row, "Sample #", "Sample") ?? "unknown";
     const id = test + "_" + sample;
     const supplemental = curatedById.get(id) ?? {};
     return {
@@ -54,20 +75,23 @@ function loadExperiments() {
       test_id: test,
       sample_id: sample,
       investigation: supplemental.investigation ?? "Burning and Suppression of Solids-II (BASS-II)",
-      date: clean(row.Date), gmt: clean(row.GMT), pi: clean(row.PI),
-      fuel_material: clean(row["Fuel Sample Material"]),
-      flow_restrictor: clean(row["Flow restrictor"]),
-      flow_configuration: clean(row["Flow configuration"]),
-      fan_display: clean(row["Fan display"]), air_display: clean(row["Air display"]),
-      total_frames: number(row["Total Frames Shot"]),
-      calibrated_initial_oxygen_pct: number(row["Calibrated  initial O2 % by vol "]),
-      calibrated_final_oxygen_pct: number(row["Calibrated final O2 % by vol"]),
-      initial_oxygen_pct: number(row["Initial O2 % by vol"]),
-      final_oxygen_pct: number(row["Final O2 % by vol"]),
-      initial_co2_pct: number(row["Initial CO2 % by vol"]),
-      final_co2_pct: number(row["Final CO2 % by vol"]),
-      initial_co_ppm: number(row["Initial CO (ppm)"]),
-      final_co_ppm: number(row["Final CO (ppm)"]),
+      date: isoDate(column(row, "Date")), gmt: column(row, "GMT"), pi: column(row, "PI"),
+      fuel_material: column(row, "Fuel Sample Material", "Material"),
+      flow_restrictor: column(row, "Flow restrictor"),
+      flow_configuration: column(row, "Flow configuration", "Flow direction"),
+      airflow_speed_cm_s: number(column(row, "Airflow speed (cm/s)", "Flow speed (cm/s)")),
+      fan_display: column(row, "Fan display"), air_display: column(row, "Air display"),
+      total_frames: number(column(row, "Total Frames Shot")),
+      calibrated_initial_oxygen_pct: number(column(row, "Calibrated initial O2 % by vol")),
+      calibrated_final_oxygen_pct: number(column(row, "Calibrated final O2 % by vol")),
+      initial_oxygen_pct: number(column(row, "Initial O2 % by vol")),
+      final_oxygen_pct: number(column(row, "Final O2 % by vol")),
+      initial_co2_pct: number(column(row, "Initial CO2 % by vol")),
+      final_co2_pct: number(column(row, "Final CO2 % by vol")),
+      initial_co_ppm: number(column(row, "Initial CO (ppm)")),
+      final_co_ppm: number(column(row, "Final CO (ppm)")),
+      flame_spread_rate_mm_s: number(column(row, "Flame spread rate (mm/s)", "Spread rate (mm/s)")),
+      burn_duration_s: number(column(row, "Burn duration (s)")),
     };
   }).map((experiment) => {
     const source = curatedById.get(experiment.experiment_id);
@@ -79,6 +103,8 @@ function loadExperiments() {
       data_provenance: "Experiment metadata loaded from the local PSI-25 BASS-II experimental table.",
     };
   });
+  const csvIds = new Set(parsed.map((experiment) => experiment.experiment_id));
+  return [...parsed, ...curated.filter((experiment) => !csvIds.has(experiment.experiment_id))];
 }
 
 function findExperiment(id) {
@@ -97,7 +123,9 @@ async function segmentFlame(dataUrl) {
       const offset = (y * info.width + x) * info.channels;
       const red = data[offset]; const green = data[offset + 1]; const blue = data[offset + 2];
       const bright = (red + green + blue) / 3;
-      if (bright > 105 && red >= green * 0.82 && green >= blue * 0.72) {
+      const warmFlame = bright > 105 && red >= green * 0.82 && green >= blue * 0.72;
+      const blueFlame = blue > 105 && blue >= red * 1.15 && blue >= green * 1.05;
+      if (warmFlame || blueFlame) {
         area += 1; sumX += x; sumY += y;
         minX = Math.min(minX, x); minY = Math.min(minY, y);
         maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
@@ -152,7 +180,8 @@ async function analyze(payload) {
       frame_count: results.length, state, confidence: Number(confidence.toFixed(3)),
       peak_area_fraction: Math.max(...areas), area_slope_per_second: Number(slope.toFixed(6)),
       summary: makeSummary(experiment, state),
-      method: "bright-warm-pixel segmentation with moving-window trend classification",
+      method: "bright warm- or blue-pixel segmentation with moving-window trend classification; confidence is a heuristic trend score, not a calibrated probability",
+      confidence_note: "Heuristic trend score for this sampled video only; it is not a calibrated probability or a fire-safety confidence estimate.",
       limitations: ["Prototype heuristic; not a validated fire-safety predictor.", "Camera exposure, background color, and crop affect segmentation.", "Results should be checked against the original experiment documentation."],
     },
     frames: results,
@@ -164,13 +193,15 @@ function reviewPriority(experiment, analysis) {
   const peak = Number(analysis.peak_area_fraction ?? 0);
   const slope = Number(analysis.area_slope_per_second ?? 0);
   const co = experiment?.final_co_ppm == null ? null : Number(experiment.final_co_ppm);
+  const spreadRate = experiment?.flame_spread_rate_mm_s == null ? null : Number(experiment.flame_spread_rate_mm_s);
   const hasFrames = Number(analysis.frame_count ?? 0) > 0;
   const hasFlameSignal = hasFrames && analysis.state !== "undetected";
   const components = [
-    { key: "flame_trend", label: "Flame trend", weight: 45, points: Object.hasOwn(statePoints, analysis.state) ? statePoints[analysis.state] : null, evidence: analysis.state ?? null },
-    { key: "peak_flame_area", label: "Peak detected flame area", weight: 25, points: hasFlameSignal && peak > 0 ? Math.min(100, (peak / 0.05) * 100) : null, evidence: hasFlameSignal && peak > 0 ? peak : null },
+    { key: "flame_trend", label: "Flame trend", weight: 40, points: Object.hasOwn(statePoints, analysis.state) ? statePoints[analysis.state] : null, evidence: analysis.state ?? null },
+    { key: "peak_flame_area", label: "Peak detected flame area", weight: 20, points: hasFlameSignal && peak > 0 ? Math.min(100, (peak / 0.05) * 100) : null, evidence: hasFlameSignal && peak > 0 ? peak : null },
     { key: "positive_area_growth", label: "Positive flame-area growth", weight: 20, points: hasFlameSignal && slope >= 0 ? Math.min(100, (slope / 0.01) * 100) : hasFlameSignal ? 0 : null, evidence: hasFlameSignal ? slope : null },
-    { key: "final_co", label: "Final CO measurement", weight: 10, points: Number.isFinite(co) ? Math.min(100, (co / 100) * 100) : null, evidence: Number.isFinite(co) ? co : null },
+    { key: "reported_spread_rate", label: "Reported flame spread rate (mm/s)", weight: 10, points: Number.isFinite(spreadRate) ? Math.max(0, Math.min(100, (spreadRate / 5) * 100)) : null, evidence: Number.isFinite(spreadRate) ? spreadRate : null },
+    { key: "final_co", label: "Final CO measurement", weight: 10, points: Number.isFinite(co) ? Math.max(0, Math.min(100, (co / 100) * 100)) : null, evidence: Number.isFinite(co) ? co : null },
   ].map((item) => ({ ...item, contribution: item.points == null ? null : Number((item.weight * item.points / 100).toFixed(2)) }));
   const availableWeight = components.reduce((sum, item) => sum + (item.points == null ? 0 : item.weight), 0);
   const weightedPoints = components.reduce((sum, item) => sum + (item.contribution ?? 0), 0);
@@ -180,6 +211,7 @@ function reviewPriority(experiment, analysis) {
   if (analysis.state === "stable") reasons.push("detected flame remains persistent");
   if (analysis.state === "shrinking" || analysis.state === "extinguished") reasons.push("detected flame trend is decreasing or extinguished");
   if (peak > 0.01) reasons.push("peak detected flame area exceeds 1% of the frame");
+  if (Number.isFinite(spreadRate)) reasons.push("NASA-reported average flame spread rate is " + spreadRate + " mm/s");
   if (Number.isFinite(co) && co > 50) reasons.push("final CO measurement exceeds 50 ppm");
   const omitted = components.filter((item) => item.points == null).map((item) => item.label);
   if (omitted.length) reasons.push("not scored because evidence is unavailable: " + omitted.join(", "));
@@ -192,7 +224,7 @@ function reviewPriority(experiment, analysis) {
     coverage_pct: coverage,
     components,
     reasons,
-    method: "Available components are normalized to 0–100 and weighted: flame trend 45%, peak detected area 25%, positive area growth 20%, and final CO 10%. The score is renormalized over available components; evidence coverage is shown separately. Area thresholds are prototype settings, not validated safety limits.",
+    method: "Available components are normalized to 0–100 and weighted: flame trend 40%, peak detected area 20%, positive area growth 20%, reported flame spread rate 10%, and final CO 10%. The score is renormalized over available components; evidence coverage is shown separately. Area and spread-rate thresholds are prototype settings, not validated safety limits.",
   };
 }
 
@@ -205,7 +237,7 @@ function rank(payload) {
     summary: {
       experiments_reviewed: ranked.length,
       highest_priority: ranked[0]?.experiment_id ?? null,
-      method: "Available analysis components are weighted and renormalized; each ranked result lists its components and evidence coverage.",
+      method: "Available analysis components, including source-reported flame spread rates, are weighted and renormalized; each ranked result lists its components and evidence coverage.",
       warning: "This prototype ranks experiments for research review. It is not a validated spacecraft hazard score, and scores with limited evidence should not be compared as complete assessments.",
     },
     ranked,

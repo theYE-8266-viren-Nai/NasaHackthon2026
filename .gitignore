@@ -10,3 +10,5 @@ out/
 # Large research inputs stay local; download them from NASA PSI when needed.
 data/
 videos/
+!dashboard/data/
+!dashboard/data/experiments.json

@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "backend": "node backend/server.mjs"
+    "backend": "node backend/server.mjs",
+    "prepare:data": "node scripts/prepare-experiments.mjs"
   },
   "dependencies": {
     "jpeg-js": "^0.4.4"
