@@ -81,17 +81,15 @@ Available endpoints:
 
 ## Frontend direction
 
-The target dashboard is a Next.js + TypeScript app using Ant Design, Recharts,
-server-side AI routes, and curated JSON data. The frontend should keep API
-keys on the server and show NASA source links beside every substantive
-finding.
+The dashboard uses Next.js + TypeScript, Ant Design, Recharts, server-side AI
+routes, and curated JSON data. API keys stay on the server, and NASA source
+links appear beside substantive findings.
 
-## Next tasks: NASA data visualizations
+## NASA data visualization implementation
 
-Build the next dashboard iteration around source-traceable NASA combustion
-measurements. Start with the existing BASS-II and Saffire-I records, and add
-FLEX as the first quantitative dataset for cross-record visualizations where
-the measurements are compatible.
+The dashboard presents source-traceable NASA combustion measurements from
+BASS-II, Saffire-I, and FLEX. Investigation-specific chart views prevent
+incompatible measurements from being pooled.
 
 NASA sources for this work:
 
@@ -114,7 +112,7 @@ page](https://gipoc.grc.nasa.gov/wp/fcf-cir/acme/burning-rate-emulator-bre-opera
 requires authorized access, so BRE is linked as research context and has no
 chartable records in this public subset.
 
-### Agent 1 — Data and backend
+### Agent 1 — Data and backend (complete)
 
 - Curate public, source-verifiable FLEX records with stable experiment and
   test IDs, original units, explicit missing values, and NASA source links.
@@ -128,18 +126,18 @@ chartable records in this public subset.
   subset. Keep BASS-II, Saffire-I, and FLEX measurements separate where their
   definitions or units are incompatible.
 
-### Agent 2 — Dashboard and charts
+### Agent 2 — Dashboard and charts (complete)
 
-- Add interactive Recharts views with investigation and metric selection,
-  useful filters, readable tooltips, and nearby NASA source references.
-- Visualize FLEX outcome counts by fuel, oxygen versus reported burning rate
-  when both values exist, and selectable summaries of reported metrics such as
-  burning rate, burn time, and flame extinction diameter.
-- Keep investigations separate when measurements are incompatible. Use line
-  charts only for actual time-series data, and label frame-derived series as
-  video analysis rather than NASA-reported measurements.
-- Provide clear loading, empty, missing-data, and error states; make charts
-  usable on mobile screens.
+- Added responsive Recharts views with investigation, fuel, outcome, test, and
+  metric selection, record-level tooltips, and nearby NASA source links.
+- FLEX charts show outcome counts by fuel, paired oxygen and reported
+  burning-rate values, and selectable summaries for burning rate, burn time,
+  visible flame extinction diameter, and initial droplet diameter.
+- Each investigation is selected and charted separately. Aggregate data stays
+  separate from frame-derived video analysis, which is labeled in the UI.
+- Charts include loading, empty, missing-data, and error states and collapse to
+  a single column on mobile. Expandable source lists trace outcome counts and
+  plotted metric bars to the included NASA record IDs.
 
 ### Shared evidence and safety requirements
 

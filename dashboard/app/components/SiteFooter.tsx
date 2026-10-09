@@ -6,7 +6,7 @@ import { ArrowUpRight, Orbit } from "lucide-react";
 
 const columns = [
   { title: "ABOUT", links: [{ label: "The project", href: "#about" }, { label: "NASA data sources", href: "#sources" }, { label: "Safety limitations", href: "#comparison" }] },
-  { title: "FEATURES", links: [{ label: "Venue overview", href: "#venues" }, { label: "Telemetry showcase", href: "#showcase" }, { label: "Experiment catalog", href: "#catalog" }] },
+  { title: "FEATURES", links: [{ label: "Venue overview", href: "#venues" }, { label: "Telemetry showcase", href: "#showcase" }, { label: "Research charts", href: "#charts" }, { label: "Experiment catalog", href: "#catalog" }] },
   { title: "COMMUNITY", links: [{ label: "Evidence Q&A", href: "#ask" }, { label: "Frame analysis", href: "#analysis" }, { label: "NASA Space Apps", href: "https://www.spaceappschallenge.org/" }] },
   { title: "RESOURCES", links: [{ label: "FLEX / PSI-69", href: "https://psi.nasa.gov/physci/repo/data/investigations/PSI-69" }, { label: "BASS-II / PSI-25", href: "https://psi.nasa.gov/physci/repo/data/investigations/PSI-25" }, { label: "SAFFIRE-I / PSI-98", href: "https://psi.nasa.gov/physci/repo/data/investigations/PSI-98" }] },
 ];

@@ -5,7 +5,7 @@ import { ArrowDownToLine, Menu, X } from "lucide-react";
 
 const menus = [
   { title: "About", links: [{ label: "The project", href: "#about" }, { label: "NASA data sources", href: "#sources" }] },
-  { title: "Features", links: [{ label: "Built for every venue", href: "#venues" }, { label: "Visualization showcase", href: "#showcase" }, { label: "Experiment catalog", href: "#catalog" }, { label: "Compare evidence", href: "#comparison" }] },
+  { title: "Features", links: [{ label: "Built for every venue", href: "#venues" }, { label: "Visualization showcase", href: "#showcase" }, { label: "Research charts", href: "#charts" }, { label: "Experiment catalog", href: "#catalog" }, { label: "Compare evidence", href: "#comparison" }] },
   { title: "Community", links: [{ label: "Video frame analysis", href: "#analysis" }, { label: "Evidence Q&A", href: "#ask" }, { label: "NASA Space Apps", href: "https://www.spaceappschallenge.org/" }] },
   { title: "Resources", links: [{ label: "FLEX / PSI-69", href: "https://psi.nasa.gov/physci/repo/data/investigations/PSI-69" }, { label: "BASS-II / PSI-25", href: "https://psi.nasa.gov/physci/repo/data/investigations/PSI-25" }, { label: "SAFFIRE-I / PSI-98", href: "https://psi.nasa.gov/physci/repo/data/investigations/PSI-98" }] },
 ];
